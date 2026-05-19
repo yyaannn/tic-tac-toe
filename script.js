@@ -76,30 +76,23 @@ const GameController = (() => {
         const success = GameBoard.setCell(index, currentPlayer.marker);
         if (!success) return;
 
-        DisplayController.render();
-
         if (checkWinner(currentPlayer.marker)) {
             gameOver = true;
-
             DisplayController.updateMessage(
                 `${currentPlayer.name} wins!`
             );
-
-            return;
-        }
-
-        if (checkTie()) {
+        } else if (checkTie()) {
             gameOver = true;
-
             DisplayController.updateMessage("It's a tie!");
-
-            return;
+        } else {
+            switchTurn();
+            DisplayController.updateMessage(
+                `${getCurrentPlayer().name}'s turn`
+            );
         }
 
-        switchTurn();
-        DisplayController.updateMessage(
-            `${getCurrentPlayer().name}'s turn`
-        );
+        DisplayController.render();
+
     };
 
     const checkWinner = (marker) => {
@@ -116,9 +109,14 @@ const GameController = (() => {
         return GameBoard.getBoard().every((cell) => cell !== "");
     };
 
+    const getGameOver = () => {
+        return gameOver;
+    };
+
     return {
         startGame,
         playRound,
+        getGameOver,
     };
 })();
 
@@ -129,9 +127,19 @@ const DisplayController = (() => {
 
     const render = () => {
         const board = GameBoard.getBoard();
+        const gameOver = GameController.getGameOver();
+
+        if (gameOver) {
+            document.getElementById("restart-btn").style.display = "block";
+        }
 
         cells.forEach((cell, index) => {
             cell.textContent = board[index];
+            if (!gameOver && board[index] === "") {
+                cell.classList.add("active");
+            } else {
+                cell.classList.remove("active");
+            }
         });
     };
 
@@ -147,11 +155,15 @@ const DisplayController = (() => {
             });
         });
 
-        document.getElementById("start-btn").addEventListener("click", () => {
+        const startBtn = document.getElementById("start-btn");
+        startBtn.addEventListener("click", () => {
+            startBtn.style.display = "none";
             GameController.startGame();
         });
 
-        document.getElementById("restart-btn").addEventListener("click", () => {
+        const restartBtn = document.getElementById("restart-btn");
+        restartBtn.addEventListener("click", () => {
+            restartBtn.style.display = "none";
             GameController.startGame();
         });
     };
