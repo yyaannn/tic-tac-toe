@@ -13,10 +13,20 @@
             <h1>Tic Tac Toe</h1>
         </div>
         <div class="content">
-            <div>
-
+            <div class="column">
+                <form id="player-form">
+                    <p class="player-name-area">
+                        <label class="player-name" for="player1">Player 1</label>
+                        <input type="text" id="player1" name="player1" placeholder="Player 1's name">
+                    </p>
+                    <p class="player-name-area">
+                        <label class="player-name" for="player2">Player 2</label>
+                        <input type="text" id="player1" name="player2" placeholder="Player 2's name">
+                    </p>
+                    <button type="submit">Enter</button>
+                </form>
             </div>
-            <div class="center-area">
+            <div class="column">
                 <div class="button-area">
                     <button id="start-btn">Start</button>
                     <button id="restart-btn" style="display: none;">Restart</button>

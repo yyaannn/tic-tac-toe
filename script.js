@@ -1,7 +1,20 @@
-function Player(name, marker) {
+function Player(_name, marker) {
+    let name = _name;
+
+    const getName = () => {
+        return name;
+    };
+
+    const setName = (newName) => {
+        if (newName !== "") {
+            name = newName;
+        }
+    };
+
     return {
-        name,
         marker,
+        getName,
+        setName,
     };
 }
 
@@ -36,7 +49,8 @@ const GameBoard = (() => {
 const GameController = (() => {
     let players = [];
     let currentPlayerIndex = 0;
-    let gameOver = true;
+    let gameStart = false;
+    let gameOver = false;
 
     const winningCombinations = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -44,19 +58,22 @@ const GameController = (() => {
         [0, 4, 8], [2, 4, 6],
     ];
 
-    const startGame = (player1Name, player2Name) => {
+    const resetPlayers = () => {
         players = [
-            Player(player1Name || "Player 1", "O"),
-            Player(player2Name || "Player 2", "X"),
+            Player("Player 1", "O"),
+            Player("Player 2", "X"),
         ];
+    };
 
+    const startGame = () => {
+        gameStart = true;
         currentPlayerIndex = 0;
         gameOver = false;
 
         GameBoard.resetBoard();
         DisplayController.render();
         DisplayController.updateMessage(
-            `${getCurrentPlayer().name} 's turn`
+            `${getCurrentPlayer().getName()} 's turn`
         );
     };
 
@@ -69,7 +86,7 @@ const GameController = (() => {
     };
 
     const playRound = (index) => {
-        if (gameOver) return;
+        if (!gameStart || gameOver) return;
 
         const currentPlayer = getCurrentPlayer();
 
@@ -79,7 +96,7 @@ const GameController = (() => {
         if (checkWinner(currentPlayer.marker)) {
             gameOver = true;
             DisplayController.updateMessage(
-                `${currentPlayer.name} wins!`
+                `${currentPlayer.getName()} wins!`
             );
         } else if (checkTie()) {
             gameOver = true;
@@ -87,7 +104,7 @@ const GameController = (() => {
         } else {
             switchTurn();
             DisplayController.updateMessage(
-                `${getCurrentPlayer().name}'s turn`
+                `${getCurrentPlayer().getName()}'s turn`
             );
         }
 
@@ -109,14 +126,31 @@ const GameController = (() => {
         return GameBoard.getBoard().every((cell) => cell !== "");
     };
 
+    const getGameStart = () => {
+        return gameStart;
+    };
+
     const getGameOver = () => {
         return gameOver;
     };
 
+    const getPlayerNames = () => {
+        return [players[0].getName(), players[1].getName()];
+    };
+
+    const setPlayerNames = (player1Name, player2Name) => {
+        players[0].setName(player1Name);
+        players[1].setName(player2Name);
+    };
+
     return {
+        resetPlayers,
         startGame,
         playRound,
+        getGameStart,
         getGameOver,
+        getPlayerNames,
+        setPlayerNames,
     };
 })();
 
@@ -124,12 +158,21 @@ const DisplayController = (() => {
     const boardElement = document.getElementById("board");
     const cells = document.querySelectorAll(".cell");
     const messageElement = document.getElementById("message");
+    const playerNameElements = document.querySelectorAll(".player-name")
 
     const render = () => {
         const board = GameBoard.getBoard();
+        const gameStart = GameController.getGameStart();
         const gameOver = GameController.getGameOver();
+        const playerNames = GameController.getPlayerNames();
 
-        if (gameOver) {
+        playerNameElements.forEach((el, index) => {
+            const defaultName = `Player ${index + 1}`;
+            const playerName = playerNames[index];
+            el.textContent = playerName === defaultName ? defaultName : `${defaultName} - ${playerName}`;
+        });
+
+        if (gameStart && gameOver) {
             document.getElementById("restart-btn").style.display = "block";
         }
 
@@ -166,6 +209,17 @@ const DisplayController = (() => {
             restartBtn.style.display = "none";
             GameController.startGame();
         });
+
+        const form = document.getElementById("player-form");
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const player1 = formData.get("player1");
+            const player2 = formData.get("player2");
+            GameController.setPlayerNames(player1, player2);
+            form.reset();
+            render();
+        });
     };
 
     return {
@@ -175,4 +229,5 @@ const DisplayController = (() => {
     };
 })();
 
+GameController.resetPlayers();
 DisplayController.bindEvents();

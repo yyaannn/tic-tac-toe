@@ -4,6 +4,7 @@ body {
     padding: 0;
     margin: 0;
     font-family: "Luckiest Guy", cursive;
+    font-size: 24px;
 }
 
 .container {
@@ -28,7 +29,25 @@ body {
     align-items: center;
 }
 
-.center-area {
+.player-name-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+input {
+    background-color: #eeeeee;
+    border-radius: 5px;
+    font-family: "Luckiest Guy", cursive;
+    padding: 5px 5px 1px 5px;
+    font-size: 16px;
+    display: block;
+}
+
+.column {
+    padding: 20px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -72,10 +91,10 @@ button {
     cursor: pointer;
     border-radius: 10px;
     border: #000000 solid 2px;
-    padding: 10px 10px 5px 10px;
+    padding: 12px 12px 5px 12px;
     margin: 20px;
     font-family: "Luckiest Guy", cursive;
-    font-size: 24px;
+    font-size: 28px;
 }
 
 button:hover {
