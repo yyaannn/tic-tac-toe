@@ -51,6 +51,7 @@ const GameController = (() => {
     let currentPlayerIndex = 0;
     let gameStart = false;
     let gameOver = false;
+    let results = []; // 0: tie, 1: player 1 wins, 2: player 2 wins
 
     const winningCombinations = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -95,11 +96,13 @@ const GameController = (() => {
 
         if (checkWinner(currentPlayer.marker)) {
             gameOver = true;
+            results.push(currentPlayerIndex + 1);
             DisplayController.updateMessage(
                 `${currentPlayer.getName()} wins!`
             );
         } else if (checkTie()) {
             gameOver = true;
+            results.push(0);
             DisplayController.updateMessage("It's a tie!");
         } else {
             switchTurn();
@@ -143,6 +146,10 @@ const GameController = (() => {
         players[1].setName(player2Name);
     };
 
+    const getResults = () => {
+        return results;
+    };
+
     return {
         resetPlayers,
         startGame,
@@ -151,6 +158,7 @@ const GameController = (() => {
         getGameOver,
         getPlayerNames,
         setPlayerNames,
+        getResults,
     };
 })();
 
@@ -158,7 +166,9 @@ const DisplayController = (() => {
     const boardElement = document.getElementById("board");
     const cells = document.querySelectorAll(".cell");
     const messageElement = document.getElementById("message");
-    const playerNameElements = document.querySelectorAll(".player-name")
+    const playerNameElements = document.querySelectorAll(".player-name");
+    const resultTbody = document.querySelector(".results > tbody");
+    const resultTfoot = document.querySelector(".results > tfoot");
 
     const render = () => {
         const board = GameBoard.getBoard();
@@ -184,6 +194,39 @@ const DisplayController = (() => {
                 cell.classList.remove("active");
             }
         });
+
+        const results = GameController.getResults();
+        resultTbody.innerHTML = "";
+        let scores = [0, 0]
+        results.forEach((result, index) => {
+            const tr = document.createElement("tr");
+            const td1 = document.createElement("td");
+            td1.textContent = `${index + 1}`;
+            const td2 = document.createElement("td");
+            switch (result) {
+                case 0:
+                    td2.textContent = "Tie";
+                    break;
+                case 1:
+                case 2:
+                    scores[result - 1]++;
+                    td2.textContent = `${playerNames[result - 1]} wins`;
+                    break;
+                default:
+                    td2.textContent = "";
+            }
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            resultTbody.appendChild(tr);
+        });
+
+        resultTfoot.innerHTML = "";
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 2;
+        td.textContent = `${playerNames[0]} ${scores[0]} : ${scores[1]} ${playerNames[1]}`;
+        tr.appendChild(td);
+        resultTfoot.appendChild(tr);
     };
 
     const updateMessage = (message) => {
